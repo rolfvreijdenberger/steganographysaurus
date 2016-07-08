@@ -1,5 +1,5 @@
 import argparse
-from steganographosaurus import stegg
+from steganographysaurus import stegg
 
 
 
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     """
     todo:
     1. validation of parameters: files, extensions, paths, payload
-    2. the payload must allow data of any kind. a preprocessor to the steganographosaurus might inject jpg data, gpg data, text data etc.
+    2. the payload must allow data of any kind. a preprocessor to the steganographysaurus might inject jpg data, gpg data, text data etc.
     3. probably least significant bits in RGB bits will be used
     4. use different strategies for selecting the bits (algorithm changes)
     5. usable by importing module and usable as a cli script via stegg.py

@@ -1,7 +1,7 @@
 import unittest
 import sys
 import os
-from steganographosaurus import stegg
+from steganographysaurus import stegg
 
 
 class TestStegg(unittest.TestCase):
