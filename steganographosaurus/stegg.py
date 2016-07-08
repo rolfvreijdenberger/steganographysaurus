@@ -1,16 +1,14 @@
 from PIL import Image
-import codecs
 import os.path
-import sys
-
 
 
 def hide(payload, channel, carrier=None):
     """
     Hides the payload(message/file) in the channel(image file) and outputs
-    to the carrier (to stdout as byte string or save as image file)
+    to the carrier (to stdout as byte string or save as image file to
+    filesystem)
     :param payload:
-    :param channel:
+    :param channel: relative or absolute filepath
     :param carrier:
     :return:
     """
@@ -19,28 +17,28 @@ def hide(payload, channel, carrier=None):
         payload = _convert_payload(payload)
 
         # 2. get the image to hide the payload in (aka: channel)
+        channel = os.path.abspath(channel)
+        print(channel)
         if os.path.isfile(channel):
             # https://pillow.readthedocs.io/en/latest/
             image = Image.open(channel)
             image_output = image.copy()
             width, height = image_output.size
             payload_length = len(payload)
-            size = width * height
-            if payload_length * 3 > size:
-                print(
-                    "payload too large for carrier: {0} and {1}".format(
-                        payload_length, size), file=sys.stderr)
-            sys.exit(2)
-        else:
-            print("channel does not exist: {0}".format(channel),
-                  file=sys.stderr)
-            sys.exit(3)
 
+            size = width * height
+            # 3 bits per pixel, plus 8 bytes for the  payload length
+            if (payload_length * 8 * 3) + 8 >= size:
+                raise Barf("payload too large for carrier: {0} and {" \
+                           "1}".format(
+                    payload_length, size), 2)
+        else:
+            raise Barf("channel does not exist: {0}".format(channel), 3)
+
+    except Barf as e:
+        raise
     except Exception as e:
-        # https://docs.python.org/3/tutorial/inputoutput.html#fancier-output-formatting
-        # stderr: https://docs.python.org/3.0/whatsnew/3.0.html#print-is-a-function
-        print(" {0}".format(str(e)), file=sys.stderr)
-        sys.exit(1)
+        raise Barf("other error: {0}".format(e), 6)
     else:
         pass
     finally:
@@ -49,7 +47,7 @@ def hide(payload, channel, carrier=None):
 
 def _convert_payload(payload):
     """
-    converts the payload to binary
+    converts the payload to bytes
     :param payload: either a file or text
     :return:bytes
     """
@@ -63,14 +61,12 @@ def _convert_payload(payload):
             output_payload = file.read()
             file.close()
         except IOError as e:
-            print('unable to open file: {0}'.format(e), file=sys.stderr)
-            sys.exit(4)
+            raise Barf('unable to open file: {0}'.format(e), 4)
     elif isinstance(payload, str):
         # create a bytes object from the payload
         output_payload = payload.encode('utf-8')
     else:
-        print('payload is neither a file nor a string', file=sys.stderr)
-        sys.exit(5)
+        raise Barf('payload is neither a file nor a string', 5)
 
     return output_payload
 
@@ -78,7 +74,15 @@ def _convert_payload(payload):
 def retrieve(carrier, file=None):
     # make sure the file is not executable
     pass
-
     # http://www.devdungeon.com/content/working-binary-data-python
-    text = ''
-    binary_text = text.encode('utf-8')
+
+
+
+class Barf(Exception):
+    """
+    Stegg had a bad lunch. Barfff.
+    """
+
+    def __init__(self, message, code):
+        super(Barf, self).__init__(message)
+        self.code = code

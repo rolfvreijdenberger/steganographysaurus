@@ -32,3 +32,10 @@ if __name__ == '__main__':
     sudo easy_install pip
     pip3 install pillow
     """
+
+    # https://docs.python.org/3/tutorial/inputoutput.html#fancier-output-formatting
+    # stderr: https://docs.python.org/3.0/whatsnew/3.0.html#print-is-a-function
+    #print(" {0}".format(str(e)), file=sys.stderr)
+    #sys.exit(1)
+
+    #https://docs.python.org/3/library/errno.html
